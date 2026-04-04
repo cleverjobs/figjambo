@@ -1,0 +1,18 @@
+{
+  "name": "figjambo",
+  "private": true,
+  "workspaces": [
+    "packages/shared",
+    "packages/plugin-utils",
+    "packages/plugins/*",
+    "packages/widgets/*",
+    "packages/server"
+  ],
+  "scripts": {
+    "build": "npm run build --workspaces --if-present",
+    "build:plugins": "npm run build --workspace=packages/plugins/extractor",
+    "dev:server": "npm run dev --workspace=packages/server",
+    "watch:extractor": "npm run watch --workspace=packages/plugins/extractor",
+    "typecheck": "npm run typecheck --workspaces --if-present"
+  }
+}

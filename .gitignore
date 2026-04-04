@@ -1,0 +1,22 @@
+.agents
+.temp
+.logs
+.claude
+.vscode
+.mcp.json
+CLAUDE.md
+
+# Dependencies
+node_modules/
+
+# Build output
+**/dist/
+
+# Generated content
+output/
+
+# TypeScript
+*.tsbuildinfo
+
+# OS
+.DS_Store

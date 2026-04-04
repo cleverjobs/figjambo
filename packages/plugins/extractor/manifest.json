@@ -1,0 +1,14 @@
+{
+  "name": "FigJambo Extractor",
+  "id": "figjambo-extractor-dev",
+  "api": "1.0.0",
+  "main": "dist/code.js",
+  "ui": "dist/ui.html",
+  "editorType": ["figjam"],
+  "documentAccess": "dynamic-page",
+  "networkAccess": {
+    "allowedDomains": ["http://localhost:8000"],
+    "reasoning": "Sends extracted document data to local server for markdown conversion",
+    "devAllowedDomains": ["*"]
+  }
+}

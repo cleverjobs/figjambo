@@ -1,0 +1,9 @@
+{
+  "name": "@figjambo/plugin-utils",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "devDependencies": {
+    "esbuild": "^0.24.0"
+  }
+}
