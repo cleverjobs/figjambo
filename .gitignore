@@ -13,10 +13,14 @@ node_modules/
 **/dist/
 
 # Generated content
-output/
+.output/
 
 # TypeScript
 *.tsbuildinfo
+
+# Environment
+.env
+.envrc
 
 # OS
 .DS_Store

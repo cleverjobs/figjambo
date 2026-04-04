@@ -31,9 +31,9 @@ npm run dev:server
 # 5. Open a FigJam board, run the plugin, click "Extract to Markdown"
 ```
 
-Output is written to `output/{board-name}/`:
+Output is written to `.output/{board-name}/`:
 ```
-output/
+.output/
 └── my-board/
     ├── README.md        # Extracted markdown
     └── assets/
@@ -71,7 +71,8 @@ Sticky notes, text, shapes with text, connectors, code blocks, tables, sections,
 |----------|---------|-------------|
 | `FIGJAMBO_PORT` | `8000` | Server port |
 | `FIGJAMBO_HOST` | `127.0.0.1` | Server host |
-| `FIGJAMBO_OUTPUT_DIR` | `./output` | Output directory for extracted boards |
+| `FIGJAMBO_OUTPUT_DIR` | `./.output` | Output directory for extracted boards |
+| `FIGMA_ACCESS_TOKENS` | _(none)_ | Figma tokens keyed by display name: `Alice:figd_abc,Bob:figd_def` |
 
 ## Requirements
 

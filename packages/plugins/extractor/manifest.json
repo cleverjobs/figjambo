@@ -6,6 +6,8 @@
   "ui": "dist/ui.html",
   "editorType": ["figjam"],
   "documentAccess": "dynamic-page",
+  "permissions": ["currentuser"],
+  "enablePrivatePluginApi": true,
   "networkAccess": {
     "allowedDomains": ["http://localhost:8000"],
     "reasoning": "Sends extracted document data to local server for markdown conversion",

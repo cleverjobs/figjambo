@@ -14,21 +14,6 @@
       gap: 12px;
       height: 100vh;
     }
-    label {
-      font-size: 11px;
-      font-weight: 500;
-      color: var(--figma-color-text-secondary, #666);
-    }
-    input {
-      width: 100%;
-      padding: 6px 8px;
-      border: 1px solid var(--figma-color-border, #ddd);
-      border-radius: 4px;
-      font-size: 12px;
-      background: var(--figma-color-bg, #fff);
-      color: var(--figma-color-text, #333);
-    }
-    input:focus { outline: 2px solid var(--figma-color-border-brand, #0d99ff); border-color: transparent; }
     button {
       width: 100%;
       padding: 10px;
@@ -68,12 +53,7 @@
   </style>
 </head>
 <body>
-  <div>
-    <label>Server URL</label>
-    <input type="text" id="serverUrl" value="http://localhost:8000" />
-  </div>
-
-  <button id="extractBtn">Extract to Markdown</button>
+  <button id="extractBtn">Extract Content</button>
 
   <div>
     <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>

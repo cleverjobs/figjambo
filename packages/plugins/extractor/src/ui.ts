@@ -1,17 +1,12 @@
 import type { DocumentPayload, PluginMessage, ExtractResponse } from '@figjambo/shared';
 
-const serverUrlInput = document.getElementById('serverUrl') as HTMLInputElement;
 const extractBtn = document.getElementById('extractBtn') as HTMLButtonElement;
 const progressFill = document.getElementById('progressFill') as HTMLDivElement;
 const statusEl = document.getElementById('status') as HTMLDivElement;
 const nodeCountEl = document.getElementById('nodeCount') as HTMLSpanElement;
 const imageCountEl = document.getElementById('imageCount') as HTMLSpanElement;
 
-let serverUrl = serverUrlInput.value;
-
-serverUrlInput.addEventListener('input', () => {
-  serverUrl = serverUrlInput.value.replace(/\/+$/, '');
-});
+const serverUrl = 'http://localhost:8000';
 
 extractBtn.addEventListener('click', () => {
   extractBtn.disabled = true;
@@ -43,17 +38,20 @@ async function sendImage(
   hash: string,
   bytes: Uint8Array,
   filename: string,
-  documentName: string,
   width: number,
   height: number
 ): Promise<void> {
   const blob = new Blob([bytes], { type: 'image/png' });
   const formData = new FormData();
-  formData.append('file', new File([blob], filename, { type: 'image/png' }));
+  // String fields BEFORE file — ensures @fastify/multipart parses them reliably
   formData.append('imageHash', hash);
-  formData.append('documentName', documentName);
+  formData.append('userName', currentPayloadContext.userName);
+  formData.append('projectName', currentPayloadContext.projectName);
+  formData.append('documentName', currentPayloadContext.documentName);
+  formData.append('pageName', currentPayloadContext.pageName);
   formData.append('originalWidth', String(width));
   formData.append('originalHeight', String(height));
+  formData.append('file', new File([blob], filename, { type: 'image/png' }));
 
   const res = await fetch(`${serverUrl}/upload-image`, {
     method: 'POST',
@@ -62,7 +60,43 @@ async function sendImage(
   if (!res.ok) throw new Error(`Image upload failed: ${res.status}`);
 }
 
-let currentDocumentName = '';
+let currentPayloadContext = { userName: '', projectName: '', documentName: '', pageName: '' };
+
+// Queue images and send sequentially after all arrive
+interface QueuedImage {
+  hash: string;
+  bytes: Uint8Array;
+  filename: string;
+  width: number;
+  height: number;
+}
+const imageQueue: QueuedImage[] = [];
+
+async function flushImageQueue() {
+  const total = imageQueue.length;
+  let sent = 0;
+  let failed = 0;
+
+  for (const img of imageQueue) {
+    try {
+      await sendImage(
+        img.hash, img.bytes, img.filename,
+        img.width, img.height
+      );
+      sent++;
+    } catch (e) {
+      failed++;
+      console.error(`Failed to upload image ${img.hash}:`, e);
+    }
+    // Progress: 60-100% range for images
+    const pct = 60 + ((sent + failed) / total) * 40;
+    setProgress(pct);
+    setStatus(`Uploading images: ${sent + failed}/${total}`, '');
+  }
+
+  imageQueue.length = 0;
+  return { sent, failed };
+}
 
 window.onmessage = async (event: MessageEvent) => {
   const msg = event.data.pluginMessage as PluginMessage;
@@ -70,7 +104,7 @@ window.onmessage = async (event: MessageEvent) => {
 
   switch (msg.type) {
     case 'extract-progress': {
-      const pct = (msg.current / msg.total) * 50; // First 50% is extraction
+      const pct = (msg.current / msg.total) * 50;
       setProgress(pct);
       setStatus(`Extracting nodes: ${msg.current}/${msg.total}`, '');
       break;
@@ -79,7 +113,12 @@ window.onmessage = async (event: MessageEvent) => {
     case 'nodes-complete': {
       nodeCountEl.textContent = String(msg.payload.nodeCount);
       imageCountEl.textContent = String(msg.payload.imageCount);
-      currentDocumentName = msg.payload.documentName;
+      currentPayloadContext = {
+        userName: msg.payload.userName,
+        projectName: msg.payload.projectName,
+        documentName: msg.payload.documentName,
+        pageName: msg.payload.pageName,
+      };
 
       setStatus('Sending to server...', '');
       setProgress(50);
@@ -87,8 +126,11 @@ window.onmessage = async (event: MessageEvent) => {
       try {
         const result = await sendPayload(msg.payload);
         if (result.status === 'success') {
-          setStatus(`Markdown saved. Uploading images...`, '');
-          setProgress(60);
+          if (result.projectName) {
+            currentPayloadContext.projectName = result.projectName;
+          }
+          setStatus(`Markdown saved. Waiting for images...`, '');
+          setProgress(55);
         } else {
           throw new Error(result.error || 'Unknown server error');
         }
@@ -101,22 +143,29 @@ window.onmessage = async (event: MessageEvent) => {
     }
 
     case 'image': {
-      try {
-        await sendImage(
-          msg.hash, msg.bytes, msg.filename,
-          currentDocumentName, msg.width, msg.height
-        );
-      } catch (e) {
-        console.error(`Failed to upload image ${msg.hash}:`, e);
-      }
+      // Queue image — don't send yet
+      imageQueue.push({
+        hash: msg.hash,
+        bytes: msg.bytes,
+        filename: msg.filename,
+        width: msg.width,
+        height: msg.height,
+      });
       break;
     }
 
     case 'images-complete': {
+      // Now send all queued images sequentially
+      setStatus(`Uploading ${imageQueue.length} images...`, '');
+      setProgress(60);
+
+      const { sent, failed } = await flushImageQueue();
+
       setProgress(100);
+      const failNote = failed > 0 ? ` (${failed} failed)` : '';
       setStatus(
-        `Done! Extracted ${nodeCountEl.textContent} nodes, ${msg.count} images.`,
-        'success'
+        `Done! ${nodeCountEl.textContent} nodes, ${sent} images${failNote}.`,
+        failed > 0 ? '' : 'success'
       );
       extractBtn.disabled = false;
       break;

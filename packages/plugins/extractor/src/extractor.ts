@@ -189,6 +189,22 @@ async function extractNode(
       text = node.name;
       break;
     }
+    case 'LINK_UNFURL': {
+      type = 'LINK_UNFURL';
+      const data = node.linkUnfurlData;
+      text = data.title || node.name;
+      metadata.linkUrl = data.url;
+      metadata.linkTitle = data.title;
+      metadata.linkDescription = data.description;
+      break;
+    }
+    case 'EMBED': {
+      type = 'EMBED';
+      const embedData = node.embedData;
+      text = embedData.title || node.name;
+      metadata.embedUrl = embedData.srcUrl;
+      break;
+    }
     default:
       // Skip unsupported node types (rectangles, ellipses, etc. without text)
       // But still check for image fills

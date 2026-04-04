@@ -1,7 +1,8 @@
 import type { DocumentPayload, UIMessage } from '@figjambo/shared';
+import { DEFAULT_PROJECT_NAME } from '@figjambo/shared';
 import { extractAllNodes } from './extractor';
 
-figma.showUI(__html__, { width: 360, height: 320, themeColors: true });
+figma.showUI(__html__, { width: 360, height: 240, themeColors: true });
 
 figma.ui.onmessage = async (msg: UIMessage) => {
   if (msg.type === 'start-extract') {
@@ -14,12 +15,15 @@ figma.ui.onmessage = async (msg: UIMessage) => {
       });
 
       const payload: DocumentPayload = {
+        userName: figma.currentUser?.name || 'unknown',
+        projectName: DEFAULT_PROJECT_NAME,
         documentName: figma.root.name,
         pageName: page.name,
         extractedAt: new Date().toISOString(),
         nodeCount: nodes.length,
         imageCount: imageHashes.size,
         nodes,
+        fileKey: figma.fileKey,
       };
 
       figma.ui.postMessage({ type: 'nodes-complete', payload });

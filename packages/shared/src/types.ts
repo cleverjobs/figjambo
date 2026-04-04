@@ -10,7 +10,9 @@ export type NodeType =
   | 'SECTION'
   | 'STAMP'
   | 'FRAME'
-  | 'MEDIA';
+  | 'MEDIA'
+  | 'LINK_UNFURL'
+  | 'EMBED';
 
 // ─── Metadata ────────────────────────────────────────────────
 
@@ -64,6 +66,14 @@ export interface NodeMetadata {
   // STAMP
   stampExpression?: string;
 
+  // LINK_UNFURL
+  linkUrl?: string;
+  linkTitle?: string;
+  linkDescription?: string;
+
+  // EMBED
+  embedUrl?: string;
+
   // MEDIA / any node with image fills
   imageHashes?: ImageRef[];
 }
@@ -88,12 +98,15 @@ export interface ExtractedNode {
 // ─── Document Payload ────────────────────────────────────────
 
 export interface DocumentPayload {
+  userName: string;
+  projectName: string;
   documentName: string;
   pageName: string;
   extractedAt: string;
   nodeCount: number;
   imageCount: number;
   nodes: ExtractedNode[];
+  fileKey?: string;
 }
 
 // ─── Plugin ↔ UI Messages ───────────────────────────────────
@@ -115,6 +128,7 @@ export interface ExtractResponse {
   status: 'success' | 'error';
   filepath?: string;
   nodeCount?: number;
+  projectName?: string;
   error?: string;
 }
 

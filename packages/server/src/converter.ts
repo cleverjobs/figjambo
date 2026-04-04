@@ -77,6 +77,19 @@ function renderNode(node: ExtractedNode, allNodes: Map<string, ExtractedNode>): 
       return `[STAMP: ${node.metadata.stampExpression || node.text}]\n`;
     }
 
+    case 'LINK_UNFURL': {
+      const url = node.metadata.linkUrl || '';
+      const title = node.metadata.linkTitle || node.text || url;
+      const desc = node.metadata.linkDescription ? ` — ${node.metadata.linkDescription}` : '';
+      return url ? `[${title}](${url})${desc}\n` : `${title}${desc}\n`;
+    }
+
+    case 'EMBED': {
+      const url = node.metadata.embedUrl || '';
+      const title = node.text || 'Embed';
+      return url ? `[${title}](${url})\n` : `${title}\n`;
+    }
+
     case 'MEDIA': {
       if (node.metadata.imageHashes && node.metadata.imageHashes.length > 0) {
         return node.metadata.imageHashes
@@ -91,70 +104,109 @@ function renderNode(node: ExtractedNode, allNodes: Map<string, ExtractedNode>): 
   }
 }
 
-interface NodeGroup {
-  heading: string;
-  headingLevel: number;
-  children: ExtractedNode[];
+// ─── Recursive section tree ──────────────────────────────────
+
+interface SectionTree {
+  node: ExtractedNode;
+  depth: number;
+  children: ExtractedNode[];       // Non-section content nodes
+  subsections: SectionTree[];      // Nested sections/frames
 }
 
-function groupNodesByParent(nodes: ExtractedNode[]): NodeGroup[] {
-  // Build parent → children map
-  const childrenOf = new Map<string, ExtractedNode[]>();
-  const topLevel: ExtractedNode[] = [];
-  const nodeById = new Map<string, ExtractedNode>();
+function isContainer(node: ExtractedNode): boolean {
+  return node.type === 'SECTION' || node.type === 'FRAME';
+}
 
-  for (const node of nodes) {
-    nodeById.set(node.id, node);
+function getDepth(node: ExtractedNode, nodeMap: Map<string, ExtractedNode>): number {
+  let depth = 0;
+  let current = node;
+  while (current.parentId) {
+    const parent = nodeMap.get(current.parentId);
+    if (!parent || !isContainer(parent)) break;
+    depth++;
+    current = parent;
   }
+  return depth;
+}
 
-  for (const node of nodes) {
-    if (node.type === 'SECTION' || node.type === 'FRAME') continue; // Sections are headings, not content
+function buildSectionTree(nodes: ExtractedNode[]): { roots: SectionTree[]; ungrouped: ExtractedNode[] } {
+  const nodeMap = new Map(nodes.map(n => [n.id, n]));
+  const containers = nodes.filter(isContainer);
+  const treeMap = new Map<string, SectionTree>();
 
-    if (node.parentId && (node.parentType === 'SECTION' || node.parentType === 'FRAME')) {
-      const existing = childrenOf.get(node.parentId) || [];
-      existing.push(node);
-      childrenOf.set(node.parentId, existing);
-    } else {
-      topLevel.push(node);
-    }
-  }
-
-  const groups: NodeGroup[] = [];
-
-  // Sections and frames become groups
-  for (const node of nodes) {
-    if (node.type === 'SECTION' || node.type === 'FRAME') {
-      const children = childrenOf.get(node.id) || [];
-      // Sort children by position: top-to-bottom, left-to-right
-      children.sort((a, b) => a.y - b.y || a.x - b.x);
-      groups.push({
-        heading: node.text || node.type,
-        headingLevel: node.type === 'SECTION' ? 2 : 3,
-        children,
-      });
-    }
-  }
-
-  // Sort groups by position
-  const sectionNodes = nodes.filter(n => n.type === 'SECTION' || n.type === 'FRAME');
-  groups.sort((a, b) => {
-    const aNode = sectionNodes.find(n => n.text === a.heading);
-    const bNode = sectionNodes.find(n => n.text === b.heading);
-    if (!aNode || !bNode) return 0;
-    return aNode.y - bNode.y || aNode.x - bNode.x;
-  });
-
-  // Add ungrouped top-level content
-  if (topLevel.length > 0) {
-    topLevel.sort((a, b) => a.y - b.y || a.x - b.x);
-    groups.push({
-      heading: 'Ungrouped Content',
-      headingLevel: 2,
-      children: topLevel,
+  // Create tree nodes for all containers
+  for (const node of containers) {
+    treeMap.set(node.id, {
+      node,
+      depth: getDepth(node, nodeMap),
+      children: [],
+      subsections: [],
     });
   }
 
-  return groups;
+  // Assign content nodes to their parent container
+  const ungrouped: ExtractedNode[] = [];
+  for (const node of nodes) {
+    if (isContainer(node)) continue;
+    if (node.parentId && treeMap.has(node.parentId)) {
+      treeMap.get(node.parentId)!.children.push(node);
+    } else {
+      ungrouped.push(node);
+    }
+  }
+
+  // Build parent-child relationships between containers
+  const roots: SectionTree[] = [];
+  for (const tree of treeMap.values()) {
+    const parentId = tree.node.parentId;
+    if (parentId && treeMap.has(parentId)) {
+      treeMap.get(parentId)!.subsections.push(tree);
+    } else {
+      roots.push(tree);
+    }
+  }
+
+  // Sort everything by position (Y then X)
+  const byPosition = (a: { node: ExtractedNode } | ExtractedNode, b: { node: ExtractedNode } | ExtractedNode) => {
+    const aNode = 'node' in a ? a.node : a;
+    const bNode = 'node' in b ? b.node : b;
+    return aNode.y - bNode.y || aNode.x - bNode.x;
+  };
+
+  roots.sort(byPosition);
+  for (const tree of treeMap.values()) {
+    tree.children.sort((a, b) => a.y - b.y || a.x - b.x);
+    tree.subsections.sort(byPosition);
+  }
+  ungrouped.sort((a, b) => a.y - b.y || a.x - b.x);
+
+  return { roots, ungrouped };
+}
+
+function renderSectionTree(
+  tree: SectionTree,
+  allNodes: Map<string, ExtractedNode>,
+  lines: string[]
+): void {
+  const level = Math.min(2 + tree.depth, 6);
+  const hashes = '#'.repeat(level);
+  lines.push(`${hashes} ${tree.node.text || tree.node.type}`);
+  lines.push('');
+
+  // Render content children
+  for (const child of tree.children) {
+    if (!child.visible) continue;
+    const rendered = renderNode(child, allNodes).trim();
+    if (rendered) {
+      lines.push(rendered);
+      lines.push('');
+    }
+  }
+
+  // Render subsections recursively
+  for (const sub of tree.subsections) {
+    renderSectionTree(sub, allNodes, lines);
+  }
 }
 
 export function convertToMarkdown(payload: DocumentPayload): string {
@@ -170,15 +222,21 @@ export function convertToMarkdown(payload: DocumentPayload): string {
   lines.push('---');
   lines.push('');
 
-  // Group and render
-  const groups = groupNodesByParent(payload.nodes);
+  // Build and render section tree
+  const { roots, ungrouped } = buildSectionTree(payload.nodes);
 
-  for (const group of groups) {
-    const hashes = '#'.repeat(group.headingLevel);
-    lines.push(`${hashes} ${group.heading}`);
+  for (const root of roots) {
+    renderSectionTree(root, allNodes, lines);
+    lines.push('---');
+    lines.push('');
+  }
+
+  // Ungrouped content
+  if (ungrouped.length > 0) {
+    lines.push('## Ungrouped Content');
     lines.push('');
 
-    for (const node of group.children) {
+    for (const node of ungrouped) {
       if (!node.visible) continue;
       const rendered = renderNode(node, allNodes).trim();
       if (rendered) {
@@ -186,10 +244,7 @@ export function convertToMarkdown(payload: DocumentPayload): string {
         lines.push('');
       }
     }
-
-    lines.push('---');
-    lines.push('');
   }
 
-  return lines.join('\n');
+  return lines.join('\n').replace(/[\u2028\u2029]/g, '\n');
 }
