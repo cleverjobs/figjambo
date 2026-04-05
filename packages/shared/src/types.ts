@@ -128,6 +128,7 @@ export interface ExtractResponse {
   status: 'success' | 'error';
   filepath?: string;
   nodeCount?: number;
+  teamName?: string;
   projectName?: string;
   error?: string;
 }

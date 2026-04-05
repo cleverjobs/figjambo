@@ -42,6 +42,44 @@ function safeGetFontFamily(node: TextNode): string | null {
   return (node.fontName as FontName).family;
 }
 
+/** Reconstruct bullet/numbered list markers from the text sublayer's list options */
+function extractTextWithListMarkers(textNode: { characters: string; getRangeListOptions: (start: number, end: number) => { type: string }; }): string {
+  const raw = textNode.characters;
+  if (!raw) return raw;
+
+  const lines = raw.split('\n');
+  const result: string[] = [];
+  let charOffset = 0;
+  let orderedCounter = 0;
+
+  for (const line of lines) {
+    if (line.length > 0) {
+      try {
+        const listOpts = textNode.getRangeListOptions(charOffset, charOffset + 1);
+        if (listOpts.type === 'UNORDERED') {
+          result.push(`• ${line}`);
+          orderedCounter = 0;
+        } else if (listOpts.type === 'ORDERED') {
+          orderedCounter++;
+          result.push(`${orderedCounter}. ${line}`);
+        } else {
+          result.push(line);
+          orderedCounter = 0;
+        }
+      } catch {
+        result.push(line);
+        orderedCounter = 0;
+      }
+    } else {
+      result.push(line);
+      orderedCounter = 0;
+    }
+    charOffset += line.length + 1; // +1 for the \n
+  }
+
+  return result.join('\n');
+}
+
 function extractConnectorEndpoint(
   endpoint: ConnectorEndpoint
 ): { nodeId?: string; position?: { x: number; y: number } } {
@@ -122,8 +160,7 @@ async function extractNode(
   switch (node.type) {
     case 'STICKY': {
       type = 'STICKY';
-      text = node.text.characters;
-      metadata.fillColor = extractFillColor(node);
+      text = extractTextWithListMarkers(node.text);
       break;
     }
     case 'TEXT': {

@@ -52,9 +52,11 @@ await server.register(uploadRoute);
 
 await server.listen({ port: config.port, host: config.host });
 
-if (config.figmaAccessTokens.size > 0) {
-  const users = [...config.figmaAccessTokens.keys()].join(', ');
-  server.log.info(`FIGMA_ACCESS_TOKENS configured for: ${users}`);
-} else {
-  server.log.warn('FIGMA_ACCESS_TOKENS not set — project names will default to "default"');
-}
+const teamCount = config.topology.teams.length;
+const projectCount = config.topology.teams.reduce((n, t) => n + t.projects.length, 0);
+const fileCount = config.topology.teams.reduce(
+  (n, t) => n + t.projects.reduce((m, p) => m + p.files.length, 0), 0,
+);
+server.log.info(
+  `Topology loaded: ${teamCount} teams, ${projectCount} projects, ${fileCount} files (updated ${config.topology.updatedAt})`,
+);

@@ -2,26 +2,22 @@ import type { FastifyInstance } from 'fastify';
 import type { DocumentPayload } from '@figjambo/shared';
 import { convertToMarkdown } from '../converter.js';
 import { writeMarkdown } from '../writer.js';
-import { fetchFolderName } from '../figma-api.js';
+import { lookupFile } from '../figma-api.js';
 
 export async function extractRoute(server: FastifyInstance) {
   server.post<{ Body: DocumentPayload }>('/extract', async (request) => {
     const payload = request.body;
 
-    let projectName = payload.projectName;
-    if (payload.fileKey) {
-      const folderName = await fetchFolderName(payload.fileKey, payload.userName, request.log);
-      if (folderName) {
-        projectName = folderName;
-      }
-    }
+    const { teamName, projectName } = lookupFile(payload.fileKey, request.log);
 
     const markdown = convertToMarkdown(payload);
     const filepath = writeMarkdown(
       markdown,
       payload.userName,
+      teamName,
       projectName,
       payload.documentName,
+      payload.fileKey,
       payload.pageName,
     );
 
@@ -29,6 +25,7 @@ export async function extractRoute(server: FastifyInstance) {
       status: 'success',
       filepath,
       nodeCount: payload.nodeCount,
+      teamName,
       projectName,
     };
   });

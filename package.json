@@ -13,6 +13,7 @@
     "build:plugins": "npm run build --workspace=packages/plugins/extractor",
     "dev:server": "npm run dev --workspace=packages/server",
     "watch:extractor": "npm run watch --workspace=packages/plugins/extractor",
-    "typecheck": "npm run typecheck --workspaces --if-present"
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "update-teams": "tsx scripts/update-teams.ts"
   }
 }

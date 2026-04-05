@@ -10,13 +10,22 @@ export function sanitizeDirName(name: string): string {
     .slice(0, 100) || 'unnamed';
 }
 
-// .output/<user>/<project>/<filename>/<pagename>/
-function getPageDir(userName: string, projectName: string, documentName: string, pageName: string): string {
+// .output/<user>/<team>/<project>/<filename--filekey>/<pagename>/
+function getPageDir(
+  userName: string,
+  teamName: string,
+  projectName: string,
+  documentName: string,
+  fileKey: string | undefined,
+  pageName: string,
+): string {
+  const docFolder = sanitizeDirName(documentName);
   return path.join(
     config.outputDir,
     sanitizeDirName(userName),
+    sanitizeDirName(teamName),
     sanitizeDirName(projectName),
-    sanitizeDirName(documentName),
+    docFolder,
     sanitizeDirName(pageName),
   );
 }
@@ -24,11 +33,13 @@ function getPageDir(userName: string, projectName: string, documentName: string,
 export function writeMarkdown(
   content: string,
   userName: string,
+  teamName: string,
   projectName: string,
   documentName: string,
+  fileKey: string | undefined,
   pageName: string,
 ): string {
-  const outputPath = getPageDir(userName, projectName, documentName, pageName);
+  const outputPath = getPageDir(userName, teamName, projectName, documentName, fileKey, pageName);
   const assetsDir = path.join(outputPath, 'assets');
 
   // Idempotent: clean previous extraction
@@ -48,13 +59,15 @@ export function writeMarkdown(
 export function writeImage(
   buffer: Buffer,
   userName: string,
+  teamName: string,
   projectName: string,
   documentName: string,
+  fileKey: string | undefined,
   pageName: string,
   imageHash: string,
   ext: string,
 ): { filepath: string; skipped: boolean } {
-  const assetsDir = path.join(getPageDir(userName, projectName, documentName, pageName), 'assets');
+  const assetsDir = path.join(getPageDir(userName, teamName, projectName, documentName, fileKey, pageName), 'assets');
   fs.mkdirSync(assetsDir, { recursive: true });
 
   const filepath = path.join(assetsDir, `${imageHash}${ext}`);

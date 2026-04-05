@@ -23,7 +23,7 @@ export async function uploadRoute(server: FastifyInstance) {
       return reply.code(400).send({ status: 'error', error: 'No file provided' });
     }
 
-    const { imageHash, userName, projectName, documentName, pageName } = fields;
+    const { imageHash, userName, teamName, projectName, documentName, fileKey, pageName } = fields;
 
     if (!imageHash || !documentName) {
       request.log.error({ receivedFields: Object.keys(fields) }, 'Missing required fields');
@@ -37,8 +37,10 @@ export async function uploadRoute(server: FastifyInstance) {
     const { filepath, skipped } = writeImage(
       fileBuffer,
       userName || 'unknown',
+      teamName || 'default',
       projectName || 'default',
       documentName,
+      fileKey || undefined,
       pageName || 'default',
       imageHash,
       ext,

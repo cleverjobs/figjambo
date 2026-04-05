@@ -8,9 +8,21 @@ function truncate(text: string, maxLen: number): string {
 function renderNode(node: ExtractedNode, allNodes: Map<string, ExtractedNode>): string {
   switch (node.type) {
     case 'STICKY': {
-      const color = node.metadata.fillColor ? `[${node.metadata.fillColor}] ` : '';
-      return `> ${color}${node.text}\n`;
+      // Normalize line separators, convert • to markdown list, blockquote each line
+      const lines = node.text
+        .replace(/[\u2028\u2029]/g, '\n')
+        .split('\n')
+        .map(line => {
+          // Convert extracted bullet markers to markdown
+          if (line.startsWith('• ')) return `> - ${line.slice(2)}`;
+          if (/^\d+\. /.test(line)) return `> ${line}`;
+          return `> ${line}`;
+        });
+      return lines.join('\n') + '\n';
     }
+
+    case 'STAMP':
+      return '';
 
     case 'TEXT': {
       const size = node.metadata.fontSize;
@@ -73,9 +85,7 @@ function renderNode(node: ExtractedNode, allNodes: Map<string, ExtractedNode>): 
       return `_${startLabel}${label}${endLabel}_\n`;
     }
 
-    case 'STAMP': {
-      return `[STAMP: ${node.metadata.stampExpression || node.text}]\n`;
-    }
+    // STAMP handled above (skipped)
 
     case 'LINK_UNFURL': {
       const url = node.metadata.linkUrl || '';

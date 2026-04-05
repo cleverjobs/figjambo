@@ -18,27 +18,34 @@ FigJam Board → Plugin extracts nodes → Local server → Markdown + images
 # 1. Install dependencies
 npm install
 
-# 2. Build the plugin
+# 2. Copy .env.example and add your Figma token(s)
+cp .env.example .env
+# Edit .env: FIGMA_ACCESS_TOKENS=YourName:figd_xxxxx
+
+# 3. Build the plugin
 npm run build:plugins
 
-# 3. Start the local server
+# 4. Start the local server
 npm run dev:server
 
-# 4. Import plugin in Figma Desktop
+# 5. Import plugin in Figma Desktop
 #    Plugins → Development → Import plugin from manifest
 #    Select: packages/plugins/extractor/manifest.json
 
-# 5. Open a FigJam board, run the plugin, click "Extract to Markdown"
+# 6. Open a FigJam board, run the plugin, click "Extract Content"
 ```
 
-Output is written to `.output/{board-name}/`:
+Output is written to `.output/{user}/{project}/{file}/{page}/`:
 ```
 .output/
-└── my-board/
-    ├── README.md        # Extracted markdown
-    └── assets/
-        ├── abc123.png   # Images (content-addressed by hash)
-        └── ...
+└── alice/
+    └── my-project/
+        └── my-board/
+            └── page-1/
+                ├── content.md     # Extracted markdown
+                └── assets/
+                    ├── abc123.png # Images (content-addressed by hash)
+                    └── ...
 ```
 
 ## Development
@@ -63,7 +70,7 @@ packages/
 
 ## Supported node types
 
-Sticky notes, text, shapes with text, connectors, code blocks, tables, sections, stamps, frames, and media/images.
+Sticky notes (with bullet lists), text, shapes with text, connectors, code blocks, tables, sections, frames, link unfurls, embeds, and media/images.
 
 ## Configuration
 

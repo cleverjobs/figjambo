@@ -1,0 +1,220 @@
+{
+  "updatedAt": "2026-04-05T07:28:02.527Z",
+  "teams": [
+    {
+      "id": "1512353511098216633",
+      "name": "conihaust",
+      "user": "kris.jobs",
+      "projects": [
+        {
+          "id": "395971501",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "cKp9JMNsh3cyFRTgHkPg8k",
+              "name": "<empty>"
+            },
+            {
+              "key": "B1Oh1aXCVUVJVpzPZtQpNS",
+              "name": "pages"
+            },
+            {
+              "key": "lBVFZC3OobjZOI3hKHQUz6",
+              "name": "project"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1407878435816180217",
+      "name": "coding",
+      "user": "kris.jobs",
+      "projects": [
+        {
+          "id": "267889745",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "NvFJPOvm9AD7M8NrpFm7c6",
+              "name": "board"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1425201916336350515",
+      "name": "devops",
+      "user": "kris.jobs",
+      "projects": [
+        {
+          "id": "286986109",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "vQVNr8yZZ7ZPHfkBHoauRN",
+              "name": "computer-science"
+            },
+            {
+              "key": "j4ev8DY1XkrwUUNDqbT2Cv",
+              "name": "data-science"
+            },
+            {
+              "key": "por89A3ydGyV1I8cu3IKf8",
+              "name": "software-engineering"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1425197013389128216",
+      "name": "h2oasis",
+      "user": "kris.jobs",
+      "projects": [
+        {
+          "id": "286980245",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "78yXh107o3OkTyRTxnnxPf",
+              "name": "<empty>"
+            },
+            {
+              "key": "FJK2mGh6hgoa3yUaTvT7rL",
+              "name": "h2oasis"
+            },
+            {
+              "key": "ae7TOJ48bxbDxcHJonjTGn",
+              "name": "h2pid"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1513823544634903844",
+      "name": "TKmaxx",
+      "user": "goblin.wtf",
+      "projects": [
+        {
+          "id": "397873671",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "0jZ9eIyQj3k7BciugTcGjb",
+              "name": "admin"
+            },
+            {
+              "key": "ZC6d9QwRwE8OjUXhaGmzFd",
+              "name": "bamba"
+            },
+            {
+              "key": "TsxoTZ5bG3DZmIGyrvktHZ",
+              "name": "board"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1497980714927502451",
+      "name": "TKworx",
+      "user": "goblin.wtf",
+      "projects": [
+        {
+          "id": "374687623",
+          "name": "workspace",
+          "files": [
+            {
+              "key": "y3qoQpfzvlMZQ92hZCDh5t",
+              "name": "crisplabs"
+            },
+            {
+              "key": "LVfy1NUjwGS29aaKAMGEK2",
+              "name": "cyberjesus"
+            },
+            {
+              "key": "4196l3dnUTUYSNQ8tPwG3x",
+              "name": "projects"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1227987913566510799",
+      "name": "TKarxiv",
+      "user": "goblin.wtf",
+      "projects": [
+        {
+          "id": "289571861",
+          "name": "nbu",
+          "files": [
+            {
+              "key": "5eRAB3Nyp1ufJ7MMHPMsKF",
+              "name": "SEMM310: Семиотични изследвания на търговската марка І част"
+            },
+            {
+              "key": "WY49HpyNik9h3vobScG7vn",
+              "name": "SEMM320 Онлайн брандинг и реклама"
+            },
+            {
+              "key": "Edp8SEf5erKQYNKTZB49Il",
+              "name": "SEMM321: Маркетинг Мениджмънт 1"
+            },
+            {
+              "key": "zD3ImqWFffagVg5sOXwdTw",
+              "name": "SEMM502: Изследователски методи на маркетинга"
+            },
+            {
+              "key": "6NlmtuEASedkg2zF30cnX4",
+              "name": "SEMM615: Brand Building"
+            },
+            {
+              "key": "yH4q6KYxOlzBOkkiFa0CUo",
+              "name": "Startup Pitch"
+            },
+            {
+              "key": "GaoJNCuvM4bBdurhCey4qH",
+              "name": "proof"
+            }
+          ]
+        },
+        {
+          "id": "357361065",
+          "name": "playground",
+          "files": [
+            {
+              "key": "a8qlMlHH1bnVUWbrBT7PYb",
+              "name": "test-widget"
+            }
+          ]
+        },
+        {
+          "id": "288875049",
+          "name": "ziomm",
+          "files": [
+            {
+              "key": "44sEKV3dOWPi01Rr2orisf",
+              "name": "world-of-ziomm"
+            },
+            {
+              "key": "9KQjPmatHf9SxkOSQREFeo",
+              "name": "z-space"
+            },
+            {
+              "key": "Extapwi6jvHNadMbHgoogi",
+              "name": "ziomm-playground"
+            },
+            {
+              "key": "TRbZuenotlwyZnEM8JZ90U",
+              "name": "ziomm-world"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
