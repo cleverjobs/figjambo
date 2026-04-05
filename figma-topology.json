@@ -1,5 +1,5 @@
 {
-  "updatedAt": "2026-04-05T07:28:02.527Z",
+  "updatedAt": "2026-04-05T18:26:21.538Z",
   "teams": [
     {
       "id": "1512353511098216633",
@@ -10,10 +10,6 @@
           "id": "395971501",
           "name": "workspace",
           "files": [
-            {
-              "key": "cKp9JMNsh3cyFRTgHkPg8k",
-              "name": "<empty>"
-            },
             {
               "key": "B1Oh1aXCVUVJVpzPZtQpNS",
               "name": "pages"
@@ -36,8 +32,8 @@
           "name": "workspace",
           "files": [
             {
-              "key": "NvFJPOvm9AD7M8NrpFm7c6",
-              "name": "board"
+              "key": "kEEQBKCgJrPkKGMMv8MNqZ",
+              "name": "<empty>"
             }
           ]
         }
@@ -211,6 +207,139 @@
             {
               "key": "TRbZuenotlwyZnEM8JZ90U",
               "name": "ziomm-world"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "1550055919469968701",
+      "name": "crisplabs",
+      "user": "krisjobs",
+      "projects": [
+        {
+          "id": "552712591",
+          "name": "Case Studies",
+          "files": [
+            {
+              "key": "VHXbz4UrRiRz7PdH9SsaLe",
+              "name": "Crisp Labs Case Studies"
+            },
+            {
+              "key": "IvSPd4zZ3DQ3BbmBM4QeZF",
+              "name": "Crisp Labs Case Studies_LinkedIn"
+            }
+          ]
+        },
+        {
+          "id": "530638607",
+          "name": "demos",
+          "files": [
+            {
+              "key": "YUeLchLcBNNIYYf3fdqdnt",
+              "name": "Demo Paragon"
+            }
+          ]
+        },
+        {
+          "id": "530083364",
+          "name": "get-together",
+          "files": [
+            {
+              "key": "j9qO1Fxocah05xRuMeSixh",
+              "name": "jan'25"
+            }
+          ]
+        },
+        {
+          "id": "501106126",
+          "name": "hadrius",
+          "files": [
+            {
+              "key": "i3ePAV5dXml81HgrVAtxlV",
+              "name": "Trading Intelligence"
+            },
+            {
+              "key": "XmPQh7S0QwaOqYluWdpldU",
+              "name": "backend"
+            },
+            {
+              "key": "VDYzqnUtiZwr433NhnhzxF",
+              "name": "observability"
+            },
+            {
+              "key": "o92FGhAP9uIxiuX6AwjCMj",
+              "name": "pipelines"
+            },
+            {
+              "key": "B02DXVUoR4NH0DdpQUDbFC",
+              "name": "roadmap"
+            }
+          ]
+        },
+        {
+          "id": "533180435",
+          "name": "labmode",
+          "files": [
+            {
+              "key": "9dy4b9ewk3uFgSHUgge8g3",
+              "name": "[labmode] claude-code"
+            }
+          ]
+        },
+        {
+          "id": "501604322",
+          "name": "lego-blocks",
+          "files": [
+            {
+              "key": "c5u5NtcjWQHKNcdjimLMmD",
+              "name": "Lego Block Sync"
+            }
+          ]
+        },
+        {
+          "id": "506871649",
+          "name": "private-capital",
+          "files": [
+            {
+              "key": "xbdAuZmAqafRKELhB5cU7E",
+              "name": "Untitled"
+            }
+          ]
+        },
+        {
+          "id": "453793833",
+          "name": "team",
+          "files": [
+            {
+              "key": "AnXFVpoCIH4VBENB8RA2I0",
+              "name": "Tech Team Board"
+            },
+            {
+              "key": "qAK93DxLywP0rn9ROiali1",
+              "name": "alliance"
+            },
+            {
+              "key": "RcQeB8jX75FRXI2iwVeXhg",
+              "name": "retro"
+            }
+          ]
+        },
+        {
+          "id": "501602758",
+          "name": "website",
+          "files": [
+            {
+              "key": "moPZCFuGqjgd6DmjMEXmNS",
+              "name": "Crisp Labs Website Uplift_Brief"
+            },
+            {
+              "key": "xgchLNJpilX7Lzx6oW9WSp",
+              "name": "website 2.0"
+            },
+            {
+              "key": "q63ZLegE2VNZMNe3YBRotC",
+              "name": "website 2.0"
             }
           ]
         }

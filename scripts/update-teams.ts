@@ -61,14 +61,25 @@ function getTokenForUser(tokens: Map<string, string>, user: string): string {
   return token;
 }
 
+const sleep = (ms: number) => new Promise(r => setTimeout(r, ms));
+
 async function figmaGet<T>(endpoint: string, token: string): Promise<T> {
-  const res = await fetch(`${FIGMA_API}${endpoint}`, {
-    headers: { 'X-Figma-Token': token },
-  });
-  if (!res.ok) {
-    throw new Error(`Figma API ${endpoint} failed: ${res.status} ${res.statusText}`);
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const res = await fetch(`${FIGMA_API}${endpoint}`, {
+      headers: { 'X-Figma-Token': token },
+    });
+    if (res.status === 429) {
+      const retryAfter = Number(res.headers.get('Retry-After') || '5');
+      console.log(`    Rate limited — waiting ${retryAfter}s...`);
+      await sleep(retryAfter * 1000);
+      continue;
+    }
+    if (!res.ok) {
+      throw new Error(`Figma API ${endpoint} failed: ${res.status} ${res.statusText}`);
+    }
+    return res.json() as Promise<T>;
   }
-  return res.json() as Promise<T>;
+  throw new Error(`Figma API ${endpoint} failed after 3 retries`);
 }
 
 interface TeamEntry { id: string; user: string | null }
@@ -145,6 +156,7 @@ async function main() {
         name: proj.name,
         files: fileRes.files.map(f => ({ key: f.key, name: f.name })),
       });
+      await sleep(500);
     }
 
     topology.teams.push({
