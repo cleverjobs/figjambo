@@ -24,6 +24,7 @@ const pid = process.pid;
 const logFile = path.join(logsDir, `server-${sofia}-${pid}.log`);
 
 const server = Fastify({
+  bodyLimit: 50 * 1024 * 1024, // 50 MB — large boards can produce big payloads
   logger: {
     level: 'info',
     transport: {
