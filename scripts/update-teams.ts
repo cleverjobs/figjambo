@@ -84,8 +84,9 @@ async function figmaGet<T>(endpoint: string, token: string): Promise<T> {
 
 interface TeamEntry { id: string; user: string | null }
 
-function parseArgs(args: string[]): { teams: TeamEntry[] } {
+function parseArgs(args: string[]): { teams: TeamEntry[]; filterUser: string | null; filterTeams: string[] } {
   const teams: TeamEntry[] = [];
+  const filterTeams: string[] = [];
   let currentUser: string | null = null;
   for (let i = 0; i < args.length; i++) {
     if (args[i] === '--user' && args[i + 1]) {
@@ -94,9 +95,14 @@ function parseArgs(args: string[]): { teams: TeamEntry[] } {
     } else if (args[i] === '--add' && args[i + 1]) {
       teams.push({ id: args[i + 1].trim(), user: currentUser });
       i++;
+    } else if (args[i] === '--team' && args[i + 1]) {
+      filterTeams.push(args[i + 1].trim());
+      i++;
     }
   }
-  return { teams };
+  // When no --add flags, --user acts as a refresh filter
+  const filterUser = teams.length === 0 ? currentUser : null;
+  return { teams, filterUser, filterTeams };
 }
 
 function loadExisting(): Topology | null {
@@ -106,7 +112,7 @@ function loadExisting(): Topology | null {
 
 async function main() {
   const args = process.argv.slice(2);
-  const { teams: addTeams } = parseArgs(args);
+  const { teams: addTeams, filterUser, filterTeams } = parseArgs(args);
   const existing = loadExisting();
   const tokens = getTokens();
 
@@ -127,12 +133,41 @@ async function main() {
     process.exit(1);
   }
 
-  const topology: Topology = {
-    updatedAt: new Date().toISOString(),
-    teams: [],
-  };
+  // Determine which teams to refresh vs preserve
+  const hasFilters = addTeams.length === 0 && (filterUser !== null || filterTeams.length > 0);
+  const toRefresh = new Map<string, string | null>();
 
-  for (const [teamId, teamUser] of teamEntries) {
+  if (hasFilters && existing) {
+    for (const [id, user] of teamEntries) {
+      const existingTeam = existing.teams.find(t => t.id === id);
+      const matchesUser = !filterUser || user === filterUser;
+      const matchesTeam = filterTeams.length === 0
+        || filterTeams.includes(id)
+        || (existingTeam && filterTeams.some(f => existingTeam.name.toLowerCase() === f.toLowerCase()));
+
+      if (matchesUser && matchesTeam) {
+        toRefresh.set(id, user);
+      }
+    }
+
+    if (toRefresh.size === 0) {
+      console.error('No teams match the provided filters.');
+      console.error(`  --user: ${filterUser ?? '(none)'}`);
+      console.error(`  --team: ${filterTeams.join(', ') || '(none)'}`);
+      process.exit(1);
+    }
+
+    console.log(`Refreshing ${toRefresh.size} of ${teamEntries.size} teams (${teamEntries.size - toRefresh.size} preserved)\n`);
+  } else {
+    for (const [id, user] of teamEntries) {
+      toRefresh.set(id, user);
+    }
+  }
+
+  // Fetch refreshed teams from API
+  const refreshedMap = new Map<string, TopologyTeam>();
+
+  for (const [teamId, teamUser] of toRefresh) {
     const token = teamUser ? getTokenForUser(tokens, teamUser) : getFirstToken(tokens);
     console.log(`Fetching team ${teamId} (using ${teamUser ?? 'default'} token)...`);
     const projRes = await figmaGet<{ name: string; projects: Array<{ id: number; name: string }> }>(
@@ -159,13 +194,30 @@ async function main() {
       await sleep(500);
     }
 
-    topology.teams.push({
+    refreshedMap.set(teamId, {
       id: teamId,
       name: teamName,
       user: teamUser ?? undefined,
       projects,
     });
   }
+
+  // Merge: maintain original order, swap in refreshed teams
+  const finalTeams: TopologyTeam[] = [];
+  for (const [id] of teamEntries) {
+    const refreshed = refreshedMap.get(id);
+    if (refreshed) {
+      finalTeams.push(refreshed);
+    } else {
+      const preserved = existing?.teams.find(t => t.id === id);
+      if (preserved) finalTeams.push(preserved);
+    }
+  }
+
+  const topology: Topology = {
+    updatedAt: new Date().toISOString(),
+    teams: finalTeams,
+  };
 
   fs.writeFileSync(TOPOLOGY_PATH, JSON.stringify(topology, null, 2) + '\n', 'utf-8');
 
@@ -178,7 +230,9 @@ async function main() {
       totalFiles += p.files.length;
     }
   }
-  console.log(`\nWritten figma-topology.json: ${topology.teams.length} teams, ${totalProjects} projects, ${totalFiles} files`);
+  const refreshedCount = refreshedMap.size;
+  const preservedCount = finalTeams.length - refreshedCount;
+  console.log(`\nWritten figma-topology.json: ${topology.teams.length} teams (${refreshedCount} refreshed, ${preservedCount} preserved), ${totalProjects} projects, ${totalFiles} files`);
 }
 
 main();

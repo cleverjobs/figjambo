@@ -14,6 +14,6 @@
     "dev:server": "npm run dev --workspace=packages/server",
     "watch:extractor": "npm run watch --workspace=packages/plugins/extractor",
     "typecheck": "npm run typecheck --workspaces --if-present",
-    "update-teams": "tsx scripts/update-teams.ts"
+    "update-teams": "node --env-file .env --import tsx/esm scripts/update-teams.ts"
   }
 }
